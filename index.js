@@ -1,13 +1,14 @@
 // parent element to store cards
 const taskContainer= document.querySelector(".task_container");
 // GLobal store
-const globalStore=[];
+let globalStore=[];
 const newCard=({id,imageUrl,taskTitle,taskDescription,taskType})=>`<div class="col-md-6 col-lg-4' id=${id}>
     <div class="card">
     <div class="card-header d-flex justify-content-end gap-2">
         <button type="button" class="btn btn-outline-success"><i class="fa-solid fa-pencil"></i></button>
-        <button type="button" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
-    </div>
+        <button type="button" id=${id} class="btn btn-outline-danger" onclick="deleteCard.apply(this,arguments)">
+        <i class="fa-solid fa-trash" id=${id} onclick="deleteCard.apply(this,arguments)"></i></button>
+    </div> 
     <img src=${imageUrl} 
     class="card-img-top" alt="...">
     <div class="card-body">
@@ -16,7 +17,8 @@ const newCard=({id,imageUrl,taskTitle,taskDescription,taskType})=>`<div class="c
       <span class="badge bg-primary">${taskType}</span>
 
     </div>
-    <div class="card-footer text-muted"><button type="button" class="btn btn-outline-primary float-end">Open Task</button>
+    <div class="card-footer text-muted">
+    <button type="button" class="btn btn-outline-primary float-end">Open Task</button>
     </div>
   </div>
   </div>`;
@@ -37,6 +39,10 @@ const loadTaskCards=()=>{
     globalStore.push(card);
   });
 }
+
+const UpdateLocalStorage=()=>{
+  localStorage.setItem("tasky",JSON.stringify({cards:globalStore}));
+}
 // to get dynamic data from website
 const saveChanges=()=>{
     const taskdata={
@@ -50,9 +56,26 @@ const saveChanges=()=>{
     const createNewcard= newCard(taskdata);
     taskContainer.insertAdjacentHTML("beforeend",createNewcard);
     globalStore.push(taskdata);
-
-    // calling API to save in local storage
-    localStorage.setItem("tasky",JSON.stringify({cards:globalStore}));
+    UpdateLocalStorage();
 };
+
+const deleteCard=(event)=>{
+  //id 
+  event = window.event;
+  const targetID=event.target.id;
+  const tagname= event.target.tagName;
+  //search for id in global store and remove
+  globalStore= globalStore.filter((card)=>card.id!==targetID);
+  UpdateLocalStorage();
+  if(tagname==="BUTTON"){
+    //task_container
+    return taskContainer.removeChild(  
+      event.parentNode.parentNode.parentNode //col-lg-4
+    );
+  };
+  return  taskContainer.removeChild(  
+    event.parentNode.parentNode.parentNode.parentNode);//col-lg-4
+};
+
 
 //storing cards in local storage(5MB)
